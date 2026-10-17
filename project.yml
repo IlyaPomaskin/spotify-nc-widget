@@ -1,0 +1,65 @@
+name: SpotifyWidget
+options:
+  bundleIdPrefix: com.ilyapomaskin
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: ${TEAM_ID}
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+packages:
+  NowPlayingKit:
+    path: NowPlayingKit
+targets:
+  SpotifyWidget:
+    type: application
+    platform: macOS
+    sources: [App]
+    dependencies:
+      - package: NowPlayingKit
+      - target: SpotifyWidgetExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ilyapomaskin.spotifywidget
+        ENABLE_HARDENED_RUNTIME: NO
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: Spotify Widget
+        LSUIElement: true
+        AppGroupID: $(TeamIdentifierPrefix)spotifywidget
+        NSAppleEventsUsageDescription: Controls Spotify playback from the widget.
+    entitlements:
+      path: App/App.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - $(TeamIdentifierPrefix)spotifywidget
+        com.apple.security.automation.apple-events: true
+  SpotifyWidgetExtension:
+    type: app-extension
+    platform: macOS
+    sources: [Widget]
+    dependencies:
+      - package: NowPlayingKit
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ilyapomaskin.spotifywidget.widget
+    info:
+      path: Widget/Info.plist
+      properties:
+        CFBundleDisplayName: Spotify Widget
+        AppGroupID: $(TeamIdentifierPrefix)spotifywidget
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: Widget/Widget.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.application-groups:
+          - $(TeamIdentifierPrefix)spotifywidget
