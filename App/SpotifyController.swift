@@ -8,8 +8,14 @@ final class SpotifyController {
     private static let fetchScriptSource = """
     tell application "Spotify"
         set separator to (ASCII character 31)
-        set currentState to player state as string
-        if currentState is "stopped" then return currentState
+        set playerState to (get player state)
+        if playerState is playing then
+            set currentState to "playing"
+        else if playerState is paused then
+            set currentState to "paused"
+        else
+            return "stopped"
+        end if
         set currentTrack to current track
         set artworkLink to ""
         try
