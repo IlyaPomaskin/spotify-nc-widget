@@ -19,6 +19,6 @@ struct NowPlayingWidget: Widget {
         }
         .configurationDisplayName("Spotify")
         .description("Now playing in Spotify, with playback controls.")
-        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+        .supportedFamilies([.systemMedium])
     }
 }

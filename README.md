@@ -2,14 +2,13 @@
 
 A macOS widget for Notification Center that shows what Spotify is playing and lets you control it.
 
-<img src="docs/images/widget-sizes.png" alt="Small, medium and large widgets" width="320">
+<img src="docs/images/widget-medium.png" alt="Medium widget" width="400">
 
-- Album cover, track name, artist (album name in the large size)
+- Album cover, track name, artist
 - Live progress bar with elapsed / remaining time
 - Previous, play/pause, next
 - Tap the cover to open the track's album page in Spotify
 - Tap the Spotify icon to bring Spotify to the front (or launch it)
-- Small, medium and large sizes
 
 ## How it works
 
@@ -42,7 +41,7 @@ security find-certificate -c "Apple Development" -p | openssl x509 -noout -subje
 Then:
 
 1. Open `~/Applications/SpotifyWidget.app` once and allow it to control Spotify.
-2. Open Notification Center → Edit Widgets → search "Spotify" → add a size.
+2. Open Notification Center → Edit Widgets → search "Spotify" → add the widget.
 
 After reinstalling, restart the processes so the new version loads:
 
