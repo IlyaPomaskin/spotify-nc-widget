@@ -2,7 +2,7 @@
 
 A macOS widget for Notification Center that shows what Spotify is playing and lets you control it.
 
-<img src="docs/images/widget-medium.png" alt="Medium widget" width="400">
+<img src="docs/images/widget.png" alt="Medium widget" width="400">
 
 - Album cover, track name, artist
 - Live progress bar with elapsed / remaining time
