@@ -1,5 +1,5 @@
 TEAM_ID ?= ABDSR7WU8G
-XCODEGEN ?= /private/tmp/spotify-widget/tools/xcodegen/bin/xcodegen
+XCODEGEN ?= xcodegen
 APP_NAME := SpotifyWidget.app
 PRODUCT := build/Build/Products/Release/$(APP_NAME)
 INSTALL_DIR := $(HOME)/Applications
