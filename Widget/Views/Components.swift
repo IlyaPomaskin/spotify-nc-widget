@@ -47,14 +47,13 @@ struct ArtworkView: View {
 }
 
 struct SpotifyBadge: View {
-    static let size: CGFloat = 36
-
     let icon: NSImage?
+    let size: CGFloat
 
     var body: some View {
         Button(intent: LaunchSpotifyIntent()) {
             badgeImage
-                .frame(width: Self.size, height: Self.size)
+                .frame(width: size, height: size)
                 .contentShape(Rectangle())
         }
         .buttonStyle(ControlButtonStyle())
@@ -69,9 +68,9 @@ struct SpotifyBadge: View {
                 .aspectRatio(contentMode: .fit)
         } else {
             Image(systemName: WidgetStyle.placeholderSymbol)
-                .font(.system(size: Self.size * 0.55, weight: .bold))
+                .font(.system(size: size * 0.55, weight: .bold))
                 .foregroundStyle(Color.black)
-                .frame(width: Self.size, height: Self.size)
+                .frame(width: size, height: size)
                 .background(Circle().fill(WidgetStyle.accent))
         }
     }
@@ -90,13 +89,15 @@ struct TappableArtworkView: View {
 }
 
 struct TrackTextView: View {
+    static let lineSpacing: CGFloat = 2
+
     let title: String
     let subtitle: String
     let titleFont: Font
     let subtitleFont: Font
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: Self.lineSpacing) {
             Text(title)
                 .font(titleFont.weight(.bold))
                 .foregroundStyle(WidgetStyle.primaryText)
@@ -113,6 +114,7 @@ struct TrackTextView: View {
 struct TrackTimelineView: View {
     // ProgressView(timerInterval:) reserves extra space below the bar; a fixed top-aligned height keeps both states identical.
     private static let barHeight: CGFloat = 4
+    private static let barToTimeSpacing: CGFloat = 6
     private static let minimumDuration: TimeInterval = 1
     // ProgressView(timerInterval:) has no pause; stretching the interval makes it advance imperceptibly while paused.
     private static let pausedStretchFactor: TimeInterval = 1_000_000
@@ -121,7 +123,7 @@ struct TrackTimelineView: View {
     let showsTimeLabels: Bool
 
     var body: some View {
-        VStack(spacing: 3) {
+        VStack(spacing: Self.barToTimeSpacing) {
             ProgressView(timerInterval: barInterval, countsDown: false) {
                 EmptyView()
             } currentValueLabel: {
@@ -170,7 +172,7 @@ struct TrackTimelineView: View {
         HStack(spacing: 0) {
             Text(timerInterval: trackInterval, pauseTime: pauseTime, countsDown: false, showsHours: true)
                 .leadingAligned()
-            (Text("-") + Text(timerInterval: trackInterval, pauseTime: pauseTime, countsDown: true, showsHours: true))
+            Text(TimeFormatting.string(seconds: nowPlaying.durationSeconds))
                 .trailingAligned()
         }
     }

@@ -6,6 +6,8 @@ import WidgetKit
 final class NowPlayingMonitor: NSObject {
     private static let spotifyStateChanged = Notification.Name("com.spotify.client.PlaybackStateChanged")
     private static let debounceInterval: Duration = .milliseconds(100)
+    private static let playerStateKey = "Player State"
+    private static let stoppedState = "Stopped"
 
     private let controller: SpotifyController
     private let store: NowPlayingStore
@@ -22,7 +24,7 @@ final class NowPlayingMonitor: NSObject {
         let distributedCenter = DistributedNotificationCenter.default()
         distributedCenter.addObserver(
             self,
-            selector: #selector(spotifyStateDidChange),
+            selector: #selector(spotifyStateDidChange(_:)),
             name: Self.spotifyStateChanged,
             object: nil,
             suspensionBehavior: .deliverImmediately
@@ -55,7 +57,12 @@ final class NowPlayingMonitor: NSObject {
         }
     }
 
-    @objc private func spotifyStateDidChange() {
+    @objc private func spotifyStateDidChange(_ notification: Notification) {
+        let isStopped = notification.userInfo?[Self.playerStateKey] as? String == Self.stoppedState
+        guard !isStopped else {
+            clearState()
+            return
+        }
         scheduleRefresh()
     }
 
@@ -67,7 +74,16 @@ final class NowPlayingMonitor: NSObject {
     @objc private func applicationLifecycleChanged(_ notification: Notification) {
         let application = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
         guard application?.bundleIdentifier == SpotifyController.bundleIdentifier else { return }
+        guard notification.name != NSWorkspace.didTerminateApplicationNotification else {
+            clearState()
+            return
+        }
         scheduleRefresh()
+    }
+
+    private func clearState() {
+        pendingRefresh?.cancel()
+        save(nil)
     }
 
     private func scheduleRefresh() {
@@ -84,10 +100,14 @@ final class NowPlayingMonitor: NSObject {
         if let current {
             await artwork.ensureArtwork(for: current)
         }
-        guard hasChanged(from: store.load(), to: current) else { return }
+        guard !Task.isCancelled else { return }
+        save(current)
+    }
 
+    private func save(_ nowPlaying: NowPlaying?) {
+        guard hasChanged(from: store.load(), to: nowPlaying) else { return }
         do {
-            try store.save(current)
+            try store.save(nowPlaying)
             WidgetCenter.shared.reloadAllTimelines()
         } catch {
             NSLog("SpotifyWidget: saving state failed: \(error)")

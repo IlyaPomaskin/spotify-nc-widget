@@ -30,7 +30,8 @@ final class SpotifyController {
     private let commandScripts = SpotifyController.commandScriptSources.compactMapValues(SpotifyController.compiled)
 
     var isRunning: Bool {
-        !NSRunningApplication.runningApplications(withBundleIdentifier: Self.bundleIdentifier).isEmpty
+        NSRunningApplication.runningApplications(withBundleIdentifier: Self.bundleIdentifier)
+            .contains { !$0.isTerminated }
     }
 
     func fetch() -> NowPlaying? {
@@ -98,10 +99,33 @@ final class SpotifyController {
         icon.draw(in: rect, from: .zero, operation: .copy, fraction: 1, respectFlipped: true, hints: [.interpolation: NSImageInterpolation.high.rawValue])
         context?.flushGraphics()
 
-        return bitmap.representation(using: .png, properties: [:])
+        guard let trimmed = Self.trimmingTransparentMargin(of: bitmap) else { return nil }
+        return trimmed.representation(using: .png, properties: [:])
     }
 
-    private static let iconPixelSide = 256
+    // macOS app icons include a transparent margin around the artwork; crop to the visible pixels.
+    private static func trimmingTransparentMargin(of bitmap: NSBitmapImageRep) -> NSBitmapImageRep? {
+        let width = bitmap.pixelsWide
+        let height = bitmap.pixelsHigh
+        let opaquePoints = (0..<height).flatMap { y in
+            (0..<width).compactMap { x -> (Int, Int)? in
+                let alpha = bitmap.colorAt(x: x, y: y)?.alphaComponent ?? 0
+                return alpha > visibleAlphaThreshold ? (x, y) : nil
+            }
+        }
+        guard let minX = opaquePoints.map(\.0).min(),
+              let maxX = opaquePoints.map(\.0).max(),
+              let minY = opaquePoints.map(\.1).min(),
+              let maxY = opaquePoints.map(\.1).max(),
+              let cgImage = bitmap.cgImage else { return nil }
+        let side = max(maxX - minX, maxY - minY) + 1
+        let cropRect = CGRect(x: minX, y: minY, width: side, height: side)
+        return cgImage.cropping(to: cropRect).map(NSBitmapImageRep.init(cgImage:))
+    }
+
+    private static let visibleAlphaThreshold: CGFloat = 0.05
+
+    private static let iconPixelSide = 320
 
     private func openCurrentTrack() {
         guard let trackURL = fetch().flatMap({ URL(string: $0.trackID) }) else {

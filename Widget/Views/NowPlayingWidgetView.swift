@@ -5,16 +5,8 @@ struct NowPlayingWidgetView: View {
     let entry: NowPlayingEntry
 
     var body: some View {
-        content
-            .overlay(alignment: .topTrailing) {
-                SpotifyBadge(icon: entry.spotifyIcon)
-            }
-    }
-
-    @ViewBuilder
-    private var content: some View {
         if let nowPlaying = entry.nowPlaying {
-            MediumView(nowPlaying: nowPlaying, artwork: entry.artwork)
+            MediumView(nowPlaying: nowPlaying, artwork: entry.artwork, spotifyIcon: entry.spotifyIcon)
         } else {
             NotPlayingView()
         }
